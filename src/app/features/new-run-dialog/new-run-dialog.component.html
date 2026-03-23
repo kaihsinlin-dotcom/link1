@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>New Assignment Run</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <input matInput formControlName="description" placeholder="Describe this run..." />
+    <mat-error *ngIf="form.get('description')?.hasError('required')">Description is required</mat-error>
+  </mat-form-field>
+
+  <div class="row">
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Week of Run</mat-label>
+      <input matInput type="number" formControlName="weekOfRun" min="1" max="52" />
+      <mat-error *ngIf="form.get('weekOfRun')?.hasError('required')">Required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Run Mode</mat-label>
+      <mat-select formControlName="mode">
+        <mat-option value="Continuous">Continuous</mat-option>
+        <mat-option value="Fixed">Fixed Duration</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width" *ngIf="isFixed">
+    <mat-label>Duration (hours)</mat-label>
+    <input matInput type="number" formControlName="duration" min="1" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Parameter Set</mat-label>
+    <mat-select formControlName="parameterSetId">
+      <mat-option *ngFor="let ps of data.parameterSets" [value]="ps.id">
+        {{ ps.name }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('parameterSetId')?.hasError('required')">Parameter set is required</mat-error>
+  </mat-form-field>
+
+  <div class="snapshot-section">
+    <mat-slide-toggle formControlName="snapshotEnabled">Enable Snapshots</mat-slide-toggle>
+
+    <mat-form-field appearance="outline" class="full-width snapshot-interval" *ngIf="snapshotEnabled">
+      <mat-label>Snapshot Interval (minutes)</mat-label>
+      <input matInput type="number" formControlName="snapshotIntervalMinutes" min="1" />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">
+    Start Run
+  </button>
+</mat-dialog-actions>

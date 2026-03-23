@@ -1,0 +1,68 @@
+.ps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.875rem;
+  }
+}
+
+.table-container {
+  border-radius: 4px;
+  overflow: auto;
+
+  table {
+    width: 100%;
+  }
+}
+
+.ps-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .ps-id {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.description-cell {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.param-chips {
+  max-width: 300px;
+}
+
+.priority-high {
+  background-color: #fce4ec !important;
+  color: #c62828 !important;
+}
+
+.priority-medium {
+  background-color: #fff3e0 !important;
+  color: #e65100 !important;
+}
+
+.priority-low {
+  background-color: #e8f5e9 !important;
+  color: #2e7d32 !important;
+}
+
+.chip-overtime {
+  background-color: #ede7f6 !important;
+  color: #4527a0 !important;
+}
