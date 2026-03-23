@@ -1,0 +1,113 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+
+  .header-title {
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.tab-nav {
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.table-wrap {
+  border-radius: 8px;
+  overflow: auto;
+  margin-top: 24px;
+
+  table {
+    width: 100%;
+  }
+}
+
+.description-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usage-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.08);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.param-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip-param {
+  font-size: 0.75rem !important;
+  height: 24px !important;
+}
+
+.chip-priority {
+  font-size: 0.75rem !important;
+  height: 24px !important;
+
+  &.chip-priority-high {
+    background-color: #fce4ec !important;
+    color: #c62828 !important;
+  }
+
+  &.chip-priority-medium {
+    background-color: #fff3e0 !important;
+    color: #e65100 !important;
+  }
+
+  &.chip-priority-low {
+    background-color: #e8f5e9 !important;
+    color: #2e7d32 !important;
+  }
+}
+
+.chip-overtime {
+  font-size: 0.75rem !important;
+  height: 24px !important;
+  background-color: #e3f2fd !important;
+  color: #1565c0 !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  color: rgba(0, 0, 0, 0.4);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}

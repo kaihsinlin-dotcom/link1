@@ -1,0 +1,30 @@
+.full-width {
+  width: 100%;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.snapshot-section {
+  margin-top: 8px;
+
+  .snapshot-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .snapshot-hint {
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .snapshot-interval {
+    margin-top: 4px;
+  }
+}
+
+mat-dialog-content {
+  padding-top: 8px !important;
+  min-width: 440px;
+}

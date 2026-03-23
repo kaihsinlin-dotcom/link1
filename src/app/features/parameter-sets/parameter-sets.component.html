@@ -1,0 +1,114 @@
+<!-- Header -->
+<div class="page-header">
+  <div class="header-title">
+    <h1>Technician Assignment Planner</h1>
+    <p class="subtitle">Simulate and compare automatic technician assignments for meeting sessions</p>
+  </div>
+</div>
+
+<!-- Tabs nav -->
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="tab-nav">
+  <a mat-tab-link routerLink="/runs" routerLinkActive #runsLink="routerLinkActive"
+     [active]="runsLink.isActive">Runs</a>
+  <a mat-tab-link routerLink="/parameter-sets" routerLinkActive #psLink="routerLinkActive"
+     [active]="psLink.isActive">Parameter Sets</a>
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+
+<!-- Table -->
+<div class="table-wrap mat-elevation-z2">
+  <table mat-table [dataSource]="parameterSets">
+
+    <!-- ID -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>Parameter Set ID</th>
+      <td mat-cell *matCellDef="let ps"><strong>{{ ps.id }}</strong></td>
+    </ng-container>
+
+    <!-- Name -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let ps">{{ ps.name }}</td>
+    </ng-container>
+
+    <!-- Description -->
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Description</th>
+      <td mat-cell *matCellDef="let ps" class="description-cell">{{ ps.description }}</td>
+    </ng-container>
+
+    <!-- Created -->
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef>Created</th>
+      <td mat-cell *matCellDef="let ps">{{ ps.created | date:'MMM d, yyyy' }}</td>
+    </ng-container>
+
+    <!-- Created By -->
+    <ng-container matColumnDef="createdBy">
+      <th mat-header-cell *matHeaderCellDef>Created By</th>
+      <td mat-cell *matCellDef="let ps">{{ ps.createdBy }}</td>
+    </ng-container>
+
+    <!-- Usage Count -->
+    <ng-container matColumnDef="usageCount">
+      <th mat-header-cell *matHeaderCellDef>Usage Count</th>
+      <td mat-cell *matCellDef="let ps">
+        <span class="usage-badge">{{ ps.usageCount }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Parameters -->
+    <ng-container matColumnDef="parameters">
+      <th mat-header-cell *matHeaderCellDef>Parameters</th>
+      <td mat-cell *matCellDef="let ps">
+        <mat-chip-set class="param-chips">
+          <mat-chip class="chip-param" matTooltip="Max sessions per technician">
+            Max Sessions: {{ ps.parameters.maxSessionsPerTech }}
+          </mat-chip>
+          <mat-chip [class]="'chip-priority chip-priority-' + ps.parameters.skillsPriority.toLowerCase()"
+                    matTooltip="Skills priority">
+            Skills: {{ ps.parameters.skillsPriority }}
+          </mat-chip>
+          <mat-chip *ngIf="ps.parameters.overtimeOk" class="chip-overtime" matTooltip="Overtime allowed">
+            Overtime OK
+          </mat-chip>
+          <mat-chip class="chip-param" matTooltip="Penalty weight">
+            Penalty: {{ ps.parameters.penaltyWeight }}x
+          </mat-chip>
+        </mat-chip-set>
+      </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let ps">
+        <button mat-icon-button [matMenuTriggerFor]="psMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #psMenu="matMenu">
+          <button mat-menu-item (click)="onEdit(ps)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="onDuplicate(ps)">
+            <mat-icon>content_copy</mat-icon>
+            <span>Duplicate</span>
+          </button>
+          <button mat-menu-item (click)="onDelete(ps)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </mat-menu>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <div class="empty-state" *ngIf="parameterSets.length === 0">
+    <mat-icon>tune</mat-icon>
+    <p>No parameter sets found.</p>
+  </div>
+</div>
