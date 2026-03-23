@@ -1,56 +1,70 @@
 <h2 mat-dialog-title>New Assignment Run</h2>
 
-<mat-dialog-content [formGroup]="form">
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Description</mat-label>
-    <input matInput formControlName="description" placeholder="Describe this run..." />
-    <mat-error *ngIf="form.get('description')?.hasError('required')">Description is required</mat-error>
-  </mat-form-field>
+<mat-dialog-content>
+  <form [formGroup]="form" autocomplete="off">
 
-  <div class="row">
-    <mat-form-field appearance="outline" class="half-width">
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Week of Run</mat-label>
-      <input matInput type="number" formControlName="weekOfRun" min="1" max="52" />
-      <mat-error *ngIf="form.get('weekOfRun')?.hasError('required')">Required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="half-width">
-      <mat-label>Run Mode</mat-label>
-      <mat-select formControlName="mode">
-        <mat-option value="Continuous">Continuous</mat-option>
-        <mat-option value="Fixed">Fixed Duration</mat-option>
+      <mat-select formControlName="weekOfRun">
+        <mat-option *ngFor="let w of weekOptions" [value]="w.value">{{ w.label }}</mat-option>
       </mat-select>
+      <mat-error *ngIf="form.get('weekOfRun')?.hasError('required')">Week is required</mat-error>
     </mat-form-field>
-  </div>
 
-  <mat-form-field appearance="outline" class="full-width" *ngIf="isFixed">
-    <mat-label>Duration (hours)</mat-label>
-    <input matInput type="number" formControlName="duration" min="1" />
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Parameter Set</mat-label>
-    <mat-select formControlName="parameterSetId">
-      <mat-option *ngFor="let ps of data.parameterSets" [value]="ps.id">
-        {{ ps.name }}
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="form.get('parameterSetId')?.hasError('required')">Parameter set is required</mat-error>
-  </mat-form-field>
-
-  <div class="snapshot-section">
-    <mat-slide-toggle formControlName="snapshotEnabled">Enable Snapshots</mat-slide-toggle>
-
-    <mat-form-field appearance="outline" class="full-width snapshot-interval" *ngIf="snapshotEnabled">
-      <mat-label>Snapshot Interval (minutes)</mat-label>
-      <input matInput type="number" formControlName="snapshotIntervalMinutes" min="1" />
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Parameter Set</mat-label>
+      <mat-select formControlName="parameterSetId">
+        <mat-option *ngFor="let ps of data.parameterSets" [value]="ps.id">
+          {{ ps.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('parameterSetId')?.hasError('required')">Parameter Set is required</mat-error>
     </mat-form-field>
-  </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Mode</mat-label>
+      <mat-select formControlName="mode">
+        <mat-option value="Fixed">Fixed</mat-option>
+        <mat-option value="Continuous">Continuous</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('mode')?.hasError('required')">Mode is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width" *ngIf="isFixed">
+      <mat-label>Duration</mat-label>
+      <mat-select formControlName="duration">
+        <mat-option *ngFor="let d of durationOptions" [value]="d">
+          {{ d === 0.5 ? '30 minutes' : d + (d === 1 ? ' hour' : ' hours') }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('duration')?.hasError('required')">Duration is required</mat-error>
+    </mat-form-field>
+
+    <div class="snapshot-section">
+      <div class="snapshot-toggle-row">
+        <mat-slide-toggle formControlName="snapshotEnabled" color="primary">
+          Auto Snapshot Save
+        </mat-slide-toggle>
+        <span class="snapshot-hint" *ngIf="!snapshotEnabled">
+          Automatically save snapshots during the run
+        </span>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width snapshot-interval" *ngIf="snapshotEnabled">
+        <mat-label>Snapshot Interval (minutes)</mat-label>
+        <input matInput type="number" formControlName="snapshotIntervalMinutes" min="1" />
+        <mat-hint>Minimum 1 minute</mat-hint>
+        <mat-error *ngIf="form.get('snapshotIntervalMinutes')?.hasError('required')">Interval is required</mat-error>
+        <mat-error *ngIf="form.get('snapshotIntervalMinutes')?.hasError('min')">Must be at least 1 minute</mat-error>
+      </mat-form-field>
+    </div>
+
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
   <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">
-    Start Run
+    Run
   </button>
 </mat-dialog-actions>

@@ -1,105 +1,214 @@
-<div class="runs-header">
-  <div>
-    <h2>Assignment Runs</h2>
-    <p class="subtitle">Manage and monitor technician assignment optimization runs</p>
+<!-- Header row: title + action buttons -->
+<div class="page-header">
+  <div class="header-title">
+    <h1>Technician Assignment Planner</h1>
+    <p class="subtitle">Simulate and compare automatic technician assignments for meeting sessions</p>
   </div>
-  <button mat-raised-button color="primary" (click)="openNewRunDialog()">
-    <mat-icon>add</mat-icon>
-    New Run
-  </button>
+  <div class="header-actions">
+    <button mat-stroked-button [disabled]="compareDisabled" (click)="onCompare()">
+      Compare
+    </button>
+    <button mat-raised-button color="primary" (click)="openNewRunDialog()">
+      <mat-icon>add</mat-icon>
+      New Run
+    </button>
+  </div>
 </div>
 
-<div class="table-container mat-elevation-z2">
-  <table mat-table [dataSource]="runs">
+<!-- Tabs nav -->
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="tab-nav">
+  <a mat-tab-link routerLink="/runs" routerLinkActive #runsLink="routerLinkActive"
+     [active]="runsLink.isActive">Runs</a>
+  <a mat-tab-link routerLink="/parameter-sets" routerLinkActive #psLink="routerLinkActive"
+     [active]="psLink.isActive">Parameter Sets</a>
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
 
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef>Run ID</th>
-      <td mat-cell *matCellDef="let run">
-        <strong>{{ run.id }}</strong>
+<!-- Filters row -->
+<div class="filters-row">
+  <span class="filter-label">Filter:</span>
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Mode</mat-label>
+    <mat-select [(value)]="modeFilter">
+      <mat-option value="all">All Modes</mat-option>
+      <mat-option value="Fixed">Fixed</mat-option>
+      <mat-option value="Continuous">Continuous</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Users</mat-label>
+    <mat-select [(value)]="byFilter">
+      <mat-option value="all">All Users</mat-option>
+      <mat-option *ngFor="let user of uniqueUsers" [value]="user">{{ user }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Weeks</mat-label>
+    <mat-select [(value)]="weekFilter">
+      <mat-option value="all">All Weeks</mat-option>
+      <mat-option *ngFor="let week of uniqueWeeks" [value]="week">{{ week }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<!-- Runs table -->
+<div class="table-wrap mat-elevation-z2">
+  <table mat-table [dataSource]="filteredRuns" multiTemplateDataRows>
+
+    <!-- Expand column -->
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef class="col-expand"></th>
+      <td mat-cell *matCellDef="let run" class="col-expand">
+        <button mat-icon-button *ngIf="run.versions.length > 1"
+                (click)="toggleExpand(run); $event.stopPropagation()"
+                class="expand-btn">
+          <mat-icon>{{ isExpanded(run) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        </button>
       </td>
     </ng-container>
 
+    <!-- Select column -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef class="col-select">
+        <mat-checkbox
+          (change)="masterToggle()"
+          [checked]="isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let run" class="col-select">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="selection.toggle(run)"
+          [checked]="selection.isSelected(run)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Run ID -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>Run ID</th>
+      <td mat-cell *matCellDef="let run"><strong>{{ run.id }}</strong></td>
+    </ng-container>
+
+    <!-- Description -->
     <ng-container matColumnDef="description">
       <th mat-header-cell *matHeaderCellDef>Description</th>
       <td mat-cell *matCellDef="let run" class="description-cell">{{ run.description }}</td>
     </ng-container>
 
+    <!-- Week of Run -->
     <ng-container matColumnDef="weekLabel">
-      <th mat-header-cell *matHeaderCellDef>Week</th>
-      <td mat-cell *matCellDef="let run">{{ run.weekLabel }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="mode">
-      <th mat-header-cell *matHeaderCellDef>Mode</th>
+      <th mat-header-cell *matHeaderCellDef>Week of Run</th>
       <td mat-cell *matCellDef="let run">
-        <mat-chip-set>
-          <mat-chip [class]="'mode-' + run.mode.toLowerCase()">{{ run.mode }}</mat-chip>
-        </mat-chip-set>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let run">
-        <span class="status-badge" [class]="getStatusClass(run.status)">{{ run.status }}</span>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="score">
-      <th mat-header-cell *matHeaderCellDef>Score</th>
-      <td mat-cell *matCellDef="let run">
-        <div class="score-cell">
-          <span class="score-value">{{ run.score | number:'1.1-1' }}</span>
-          <mat-progress-bar
-            mode="determinate"
-            [value]="run.score"
-            [color]="getScoreColor(run.score)"
-            class="score-bar">
-          </mat-progress-bar>
+        <div class="week-cell">
+          <span class="week-dot" [style.background-color]="getWeekDotColor(run.weekLabel)"></span>
+          {{ run.weekLabel }}
         </div>
       </td>
     </ng-container>
 
+    <!-- Started -->
+    <ng-container matColumnDef="started">
+      <th mat-header-cell *matHeaderCellDef>Started</th>
+      <td mat-cell *matCellDef="let run">{{ run.started | date:'MMM d, yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Assigned by -->
     <ng-container matColumnDef="by">
-      <th mat-header-cell *matHeaderCellDef>Started By</th>
+      <th mat-header-cell *matHeaderCellDef>Assigned by</th>
       <td mat-cell *matCellDef="let run">{{ run.by }}</td>
     </ng-container>
 
-    <ng-container matColumnDef="versions">
-      <th mat-header-cell *matHeaderCellDef>Versions</th>
+    <!-- Score -->
+    <ng-container matColumnDef="score">
+      <th mat-header-cell *matHeaderCellDef>Score</th>
+      <td mat-cell *matCellDef="let run">
+        <div class="score-cell">
+          <mat-progress-bar mode="determinate" [value]="run.score" class="score-bar"></mat-progress-bar>
+          <span class="score-value">{{ run.score | number:'1.1-1' }}</span>
+        </div>
+      </td>
+    </ng-container>
+
+    <!-- Last Improvement -->
+    <ng-container matColumnDef="lastImprovement">
+      <th mat-header-cell *matHeaderCellDef>Last Improvement</th>
+      <td mat-cell *matCellDef="let run">{{ run.lastImprovement | date:'MMM d, yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Mode -->
+    <ng-container matColumnDef="mode">
+      <th mat-header-cell *matHeaderCellDef>Mode</th>
       <td mat-cell *matCellDef="let run">
         <mat-chip-set>
-          <mat-chip>v{{ run.versions.length }}</mat-chip>
+          <mat-chip [class]="run.mode === 'Fixed' ? 'chip-fixed' : 'chip-continuous'">
+            {{ run.mode }}
+          </mat-chip>
         </mat-chip-set>
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <!-- Snapshot -->
+    <ng-container matColumnDef="snapshot">
+      <th mat-header-cell *matHeaderCellDef>Snapshot</th>
       <td mat-cell *matCellDef="let run">
-        <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="More actions">
+        <span class="version-badge">{{ run.versions.length }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let run">
+        <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
           <mat-icon>more_vert</mat-icon>
         </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item
-            *ngIf="run.status === 'Running'"
-            (click)="stopRun(run)">
+        <mat-menu #actionMenu="matMenu">
+          <button mat-menu-item (click)="onSave(run)">
+            <mat-icon>save</mat-icon>
+            <span>Save</span>
+          </button>
+          <button mat-menu-item (click)="onStop(run)">
             <mat-icon>stop</mat-icon>
-            <span>Stop Run</span>
+            <span>Stop</span>
           </button>
-          <button mat-menu-item>
-            <mat-icon>visibility</mat-icon>
-            <span>View Details</span>
-          </button>
-          <button mat-menu-item>
-            <mat-icon>history</mat-icon>
-            <span>View Versions</span>
+          <button mat-menu-item (click)="onDelete(run)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
           </button>
         </mat-menu>
       </td>
     </ng-container>
 
+    <!-- Expanded detail row column -->
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell *matCellDef="let run" [attr.colspan]="displayedColumns.length">
+        <div class="expanded-content" *ngIf="isExpanded(run)">
+          <div class="expanded-title">Version History</div>
+          <div class="versions-list">
+            <div class="version-row" *ngFor="let v of run.versions.slice().reverse()">
+              <span class="version-label">v{{ v.version }}</span>
+              <span class="version-score">Score: {{ v.score | number:'1.1-1' }}</span>
+              <span class="version-date">{{ v.createdAt | date:'MMM d, yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr mat-row *matRowDef="let run; columns: displayedColumns;"
+        class="data-row"
+        [class.expanded-data-row]="isExpanded(run)">
+    </tr>
+    <tr mat-row *matRowDef="let run; columns: ['expandedDetail']" class="expanded-detail-row"></tr>
   </table>
+
+  <div class="empty-state" *ngIf="filteredRuns.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <p>No runs match the selected filters.</p>
+  </div>
 </div>

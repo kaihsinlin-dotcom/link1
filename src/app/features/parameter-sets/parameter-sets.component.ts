@@ -10,7 +10,7 @@ import { ParameterSet } from '../../types/assignment';
 })
 export class ParameterSetsComponent implements OnInit {
   parameterSets: ParameterSet[] = [];
-  displayedColumns = ['name', 'description', 'createdBy', 'usageCount', 'parameters', 'actions'];
+  displayedColumns = ['id', 'name', 'description', 'created', 'createdBy', 'usageCount', 'parameters', 'actions'];
 
   ngOnInit(): void {
     this.parameterSets = [...parameterSets];
@@ -18,5 +18,26 @@ export class ParameterSetsComponent implements OnInit {
 
   getPriorityClass(priority: string): string {
     return `priority-${priority.toLowerCase()}`;
+  }
+
+  onEdit(ps: ParameterSet): void {
+    console.log('Edit parameter set:', ps.id);
+  }
+
+  onDelete(ps: ParameterSet): void {
+    console.log('Delete parameter set:', ps.id);
+    this.parameterSets = this.parameterSets.filter(p => p.id !== ps.id);
+  }
+
+  onDuplicate(ps: ParameterSet): void {
+    console.log('Duplicate parameter set:', ps.id);
+    const copy: ParameterSet = {
+      ...ps,
+      id: `${ps.id}-copy`,
+      name: `${ps.name} (copy)`,
+      created: new Date().toISOString(),
+      usageCount: 0,
+    };
+    this.parameterSets = [...this.parameterSets, copy];
   }
 }
